@@ -1,38 +1,65 @@
 #include <iostream>
+
 #include <vector>
-#include <map>
+#include <algorithm>
+using namespace std;
 
-int main(int argc, char const *argv[])
-{
-    std::vector<std::vector<int>> land = {{1, 2}, {2, 3}};
-    int P=3, Q=2;
-    // std::vector<std::vector<int> > land = {{4, 4, 3}, {3, 2, 2}, { 2, 1, 0 }};
-    // int P=5, Q=3;
+long long solution(vector<vector<int>> land, int P, int Q) {
+    long long answer = INT64_MAX;
 
-    long long answer=0;
+    int N = land.size();
+    N *= N;
 
-    std::map<int, int> land_map;
-    for (std::vector<int> row : land) {
-        for (int value : row) {
-            std::map<int, int>::iterator value_iter = land_map.find(value);
-            if (value_iter == land_map.end()) land_map.insert({value, 1});
-            else value_iter->second++;
+    std::vector<int> flat;
+    for (auto row : land) 
+        flat.insert(flat.end(), row.begin(), row.end()); 
+    std::sort(flat.begin(), flat.end());
+
+    uint64_t sum = 0;
+    for(auto val : flat) sum += val;
+    uint64_t area_fill = 0;
+    uint64_t to_fill = 0;
+    uint64_t area_remove = N;
+    uint64_t to_remove = sum;
+
+    int flat_idx=0;
+    for (int i=0; i<=1000000000; ++i) {
+        int count = 0;
+        while (i != flat[flat_idx]) {
+            i++;
+            to_fill += area_fill;
+            to_remove -= area_remove;
         }
-    }
-
-    int m = 1;
-    while (m < 1000000001) {
+        while (flat_idx < N && i == flat[flat_idx]) {
+            flat_idx++;
+            count++;
+        } 
+        if (flat_idx >= N) break;
         
+        uint64_t cost = to_fill*P + to_remove*Q;
+        if(cost < answer) answer = cost;
+        area_fill += count;
+        to_fill += area_fill;
+        area_remove -= count;
+        to_remove -= area_remove;
     }
+    uint64_t cost = to_fill*P + to_remove*Q;
+    if(cost < answer) answer = cost;
 
+    return answer;
+}
 
-    std::vector<int> base(1000000001);
+int main(int argc, char const *argv[]) {
+    // std::vector<std::vector<int>> land = {{1, 2}, {2, 3}};
+    // int P = 3;
+    // int Q = 2;
 
-    for (int i=0; i<1000000001; i++) {
-        std::cout << iter.first << " " << iter.second << "\n";
-    }
+    std::vector<std::vector<int>> land = {{4, 4, 3}, {3, 2, 2}, { 2, 1, 0 }};
+    // std::vector<std::vector<int>> land = {{4, 5, 3}, {3, 1, 2}, { 2, 1, 0 }};
+    int P = 5;
+    int Q = 3;
 
-    // for ()
-    
+    long long answer = solution(land, P, Q);
+    std::cout<<answer<<"\n";
     return 0;
 }
